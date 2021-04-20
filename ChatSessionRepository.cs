@@ -29,6 +29,11 @@ namespace Penguin.Cms.Modules.Communication.Repositories
 
         public ChatSession GetForUsers(params Guid[] targets)
         {
+            if (targets is null)
+            {
+                throw new ArgumentNullException(nameof(targets));
+            }
+
             int DistinctUsers = targets.Distinct().Count();
 
             List<ChatUserSession> openChats = new List<ChatUserSession>();
@@ -63,6 +68,11 @@ namespace Penguin.Cms.Modules.Communication.Repositories
 
         public ChatSession OpenSession(params Guid[] targets)
         {
+            if (targets is null)
+            {
+                throw new ArgumentNullException(nameof(targets));
+            }
+
             ChatSession newSession = new ChatSession();
 
             foreach (Guid entity in targets)
