@@ -12,6 +12,7 @@ namespace Penguin.Cms.Communication.Repositories
     public class ChatUserSessionRepository : EntityRepository<ChatUserSession>
     {
         protected IUserSession UserSession { get; set; }
+
         private ISecurityProvider<ChatUserSession> SecurityProvider { get; set; }
 
         public ChatUserSessionRepository(ISecurityProvider<ChatUserSession> securityProvider, IPersistenceContext<ChatUserSession> dbContext, IUserSession userSession = null, MessageBus messageBus = null) : base(dbContext, messageBus)
