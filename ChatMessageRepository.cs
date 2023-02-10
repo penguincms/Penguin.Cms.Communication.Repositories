@@ -1,19 +1,17 @@
-﻿using Penguin.Cms.Communication;
-using Penguin.Cms.Repositories;
+﻿using Penguin.Cms.Repositories;
 using Penguin.Messaging.Core;
 using Penguin.Persistence.Abstractions.Interfaces;
 using Penguin.Security.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Penguin.Cms.Modules.Communication.Repositories
+namespace Penguin.Cms.Communication.Repositories
 {
-    [SuppressMessage("Naming", "CA1710:Identifiers should have correct suffix")]
     public class ChatMessageRepository : EntityRepository<ChatMessage>
     {
         protected ChatUserSessionRepository ChatUserSessionRepository { get; set; }
+
         protected ISecurityProvider<ChatMessage> SecurityProvider { get; set; }
 
         public ChatMessageRepository(IPersistenceContext<ChatMessage> dbContext, ISecurityProvider<ChatMessage> securityProvider, ChatUserSessionRepository chatUserSessionRepository, MessageBus messageBus = null) : base(dbContext, messageBus)
@@ -22,11 +20,14 @@ namespace Penguin.Cms.Modules.Communication.Repositories
             SecurityProvider = securityProvider;
         }
 
-        public List<ChatMessage> GetMessages(Guid chatSession) => this.Where(m => m.ChatSession == chatSession).ToList();
+        public List<ChatMessage> GetMessages(Guid chatSession)
+        {
+            return this.Where(m => m.ChatSession == chatSession).ToList();
+        }
 
         public List<ChatMessage> GetMessagesAfter(int Id)
         {
-            ChatMessage chatMessage = this.Find(Id) ?? throw new NullReferenceException($"No ChatMessage found with Id {Id}");
+            ChatMessage chatMessage = Find(Id) ?? throw new NullReferenceException($"No ChatMessage found with Id {Id}");
 
             if (chatMessage == null)
             {
@@ -38,16 +39,16 @@ namespace Penguin.Cms.Modules.Communication.Repositories
             return this.Where(c => c.ChatSession == ChatSession && c._Id > Id).ToList();
         }
 
-        public List<ChatMessage> GetMessagesFor(Guid Id) => this.Where(c => c.ChatSession == Id).ToList();
+        public List<ChatMessage> GetMessagesFor(Guid Id)
+        {
+            return this.Where(c => c.ChatSession == Id).ToList();
+        }
 
         public ChatMessage SendMessageToChat(ChatSession chatSession, IUser user, string Message)
         {
-            if (chatSession is null)
-            {
-                throw new ArgumentNullException(nameof(chatSession));
-            }
-
-            return this.SendMessageToChat(chatSession.Guid, user, Message);
+            return chatSession is null
+                ? throw new ArgumentNullException(nameof(chatSession))
+                : SendMessageToChat(chatSession.Guid, user, Message);
         }
 
         public ChatMessage SendMessageToChat(Guid chatSession, IUser user, string Message)
@@ -57,7 +58,7 @@ namespace Penguin.Cms.Modules.Communication.Repositories
                 throw new ArgumentNullException(nameof(user));
             }
 
-            ChatMessage toSend = new ChatMessage()
+            ChatMessage toSend = new()
             {
                 ChatSession = chatSession,
                 User = user.Guid,
@@ -67,7 +68,7 @@ namespace Penguin.Cms.Modules.Communication.Repositories
 
             SecurityProvider.SetDefaultPermissions(toSend);
 
-            this.Add(toSend);
+            Add(toSend);
 
             return toSend;
         }

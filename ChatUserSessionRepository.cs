@@ -1,17 +1,14 @@
-﻿using Penguin.Cms.Communication;
-using Penguin.Cms.Repositories;
+﻿using Penguin.Cms.Repositories;
 using Penguin.Messaging.Core;
 using Penguin.Persistence.Abstractions.Interfaces;
 using Penguin.Security.Abstractions;
 using Penguin.Security.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Penguin.Cms.Modules.Communication.Repositories
+namespace Penguin.Cms.Communication.Repositories
 {
-    [SuppressMessage("Naming", "CA1710:Identifiers should have correct suffix")]
     public class ChatUserSessionRepository : EntityRepository<ChatUserSession>
     {
         protected IUserSession UserSession { get; set; }
@@ -25,7 +22,6 @@ namespace Penguin.Cms.Modules.Communication.Repositories
 
         public void AddUserToSession(Guid chatSession, Guid entity)
         {
-
             ChatUserSession existing = this.Where(c => c.ChatSession == chatSession && c.User == entity).FirstOrDefault();
 
             if (existing is null)
@@ -38,25 +34,25 @@ namespace Penguin.Cms.Modules.Communication.Repositories
 
                 SecurityProvider.AddPermissions(existing, PermissionTypes.Full, entity);
 
-                this.Add(existing);
+                Add(existing);
             }
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters")]
         public List<ChatUserSession> GetSessionsForUser(IUser u)
         {
-            u = u ?? this.UserSession.LoggedInUser;
+            u ??= UserSession.LoggedInUser;
 
-            if (u is null)
-            {
-                throw new Exception("What the fuck?");
-            }
-
-            return this.GetSessionsForUser(u.Guid);
+            return u is null ? throw new Exception("What the fuck?") : GetSessionsForUser(u.Guid);
         }
 
-        public List<ChatUserSession> GetSessionsForUser(Guid g) => this.Where(c => c.User == g).ToList();
+        public List<ChatUserSession> GetSessionsForUser(Guid g)
+        {
+            return this.Where(c => c.User == g).ToList();
+        }
 
-        public List<Guid> GetUsersForSession(Guid Session) => this.Where(c => c.ChatSession == Session).Select(c => c.User).Distinct().ToList();
+        public List<Guid> GetUsersForSession(Guid Session)
+        {
+            return this.Where(c => c.ChatSession == Session).Select(c => c.User).Distinct().ToList();
+        }
     }
 }
