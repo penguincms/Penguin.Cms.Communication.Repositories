@@ -13,6 +13,7 @@ namespace Penguin.Cms.Communication.Repositories
     public class ChatSessionRepository : EntityRepository<ChatSession>
     {
         protected ChatUserSessionRepository ChatUserSessionRepository { get; set; }
+
         protected ISecurityProvider<ChatSession> SecurityProvider { get; set; }
 
         protected IUserSession UserSession { get; set; }
